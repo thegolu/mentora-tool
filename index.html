@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mentora — Reports</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{
+  --m:#7B1C2E; --md:#5a1320; --ml:#f9f0f2; --mm:#e8c4cc;
+  --g:#C9A84C; --gl:#f5edd6; --gd:#9a7a2e;
+  --cream:#FAF7F2; --bg:#f2ede8; --white:#fff;
+  --border:#e4dbd2; --border2:#cfc4b8;
+  --text:#2c1810; --muted:#8a7060; --muted2:#b09a88;
+  --green:#1a6b45; --greenl:#edf7f2;
+  --red:#a01c1c;   --redl:#fdf0f0;
+  --orange:#b85c00;--orangel:#fef5e8;
+  --sh:0 1px 4px rgba(44,24,16,.08);
+  --shm:0 4px 16px rgba(44,24,16,.12);
+  --shl:0 12px 40px rgba(44,24,16,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;min-height:100vh;}
+
+/* ── TOP HEADER ── */
+.header{
+  background:var(--md);
+  padding:0 32px;
+  display:flex;align-items:center;gap:20px;
+  height:54px;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+  position:sticky;top:0;z-index:50;
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-m{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,var(--m),var(--md));
+  border:1.5px solid var(--g);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--g);
+}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--g);}
+.logo-sep{width:1px;height:22px;background:rgba(201,168,76,.2);}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:2px;flex:1;}
+.ntab{
+  padding:8px 16px;border-radius:7px;cursor:pointer;
+  color:rgba(250,247,242,.5);font-size:13px;font-weight:500;
+  transition:all .15s;
+}
+.ntab:hover{background:rgba(201,168,76,.1);color:rgba(250,247,242,.8);}
+.ntab.active{background:rgba(201,168,76,.18);color:var(--g);}
+
+.header-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+
+/* ── MAIN ── */
+.page{max-width:1100px;margin:0 auto;padding:28px 24px;display:none;}
+.page.active{display:block;}
+
+/* ── SELECTOR BAR ── */
+.sel-bar{
+  background:var(--white);border:1px solid var(--border);border-radius:12px;
+  padding:16px 20px;box-shadow:var(--sh);margin-bottom:20px;
+  display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+}
+.sel-group{display:flex;flex-direction:column;gap:5px;}
+.sel-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+select,input[type=text],input[type=date],input[type=number]{
+  background:var(--cream);border:1px solid var(--border2);color:var(--text);
+  padding:7px 11px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;
+  outline:none;transition:border .15s;
+}
+select:focus,input:focus{border-color:var(--m);box-shadow:0 0 0 3px rgba(123,28,46,.07);}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:8px;font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;
+}
+.btn-m{background:var(--m);color:white;}
+.btn-m:hover{background:var(--md);}
+.btn-g{background:var(--g);color:var(--md);}
+.btn-g:hover{background:var(--gd);color:white;}
+.btn-out{background:white;color:var(--text);border:1px solid var(--border2);box-shadow:var(--sh);}
+.btn-out:hover{border-color:var(--m);color:var(--m);}
+.btn-ghost{background:transparent;color:var(--muted);}
+.btn-ghost:hover{color:var(--text);background:var(--bg);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh);}
+.cp{padding:20px;}
+.ct{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--m);margin-bottom:14px;}
+
+/* ── STAT ROW ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--m),var(--g));}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--m);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);background:white;box-shadow:var(--sh);}
+.tbl-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tbl-title{font-weight:600;font-size:14px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--cream);}
+th{text-align:left;padding:9px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-family:'JetBrains Mono',monospace;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .1s;cursor:pointer;}
+tbody tr:hover{background:var(--ml);}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;}
+.b-pass{background:var(--greenl);color:var(--green);}
+.b-fail{background:var(--redl);color:var(--red);}
+.b-warn{background:var(--orangel);color:var(--orange);}
+.b-gold{background:var(--gl);color:var(--gd);}
+
+/* ── PROGRESS ── */
+.prog{display:flex;align-items:center;gap:7px;}
+.pbar{flex:1;max-width:70px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.pfill{height:100%;border-radius:3px;}
+.plbl{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;min-width:34px;}
+
+/* ── RANK ── */
+.rk{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.r1{background:#fef9c3;color:#854d0e;} .r2{background:#f1f5f9;color:#475569;} .r3{background:#fff7ed;color:#9a3412;} .rn{background:var(--bg);color:var(--muted);}
+
+/* ── MODAL ── */
+.ov{position:fixed;inset:0;background:rgba(44,24,16,.5);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);}
+@keyframes sUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal{background:white;border-radius:14px;width:740px;max-width:96vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shl);animation:sUp .2s ease;border-top:3px solid var(--g);}
+.mh{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;background:linear-gradient(135deg,var(--cream),white);}
+.mb{flex:1;overflow-y:auto;padding:20px 22px;}
+.mf{padding:12px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+.mt{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--m);}
+.ms{font-size:11px;color:var(--muted);margin-top:2px;}
+.cbtn{background:var(--bg);border:none;width:28px;height:28px;border-radius:7px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.cbtn:hover{background:var(--border);color:var(--text);}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.tab{padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;border-radius:4px 4px 0 0;}
+.tab:hover{color:var(--text);background:var(--bg);}
+.tab.active{color:var(--m);border-bottom-color:var(--m);background:var(--ml);}
+
+/* ── STUDENT HEADER ── */
+.s-hdr{
+  display:flex;align-items:center;gap:14px;
+  background:linear-gradient(135deg,var(--ml),white);
+  border:1px solid var(--mm);border-radius:10px;
+  padding:14px 16px;margin-bottom:16px;
+}
+.s-av{
+  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--m),var(--md));
+  display:flex;align-items:center;justify-content:center;
+  color:var(--g);font-family:'Cormorant Garamond',serif;font-size:18px;
+}
+.s-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--m);}
+.s-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+
+/* ── SUBJECT PILLS ── */
+.sub-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.sub-pill{background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;min-width:80px;}
+.sp-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px;}
+.sp-val{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;}
+
+/* ── SPARKLINE ── */
+.spark{display:flex;align-items:flex-end;gap:6px;height:60px;}
+.sc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;}
+.sb{width:100%;border-radius:3px 3px 0 0;min-height:3px;}
+.sl{font-size:9px;color:var(--muted);text-align:center;font-family:'JetBrains Mono',monospace;line-height:1.2;margin-top:3px;}
+
+/* ── MSG ── */
+.msgbox{background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text);line-height:1.8;white-space:pre-wrap;}
+
+/* ── UPLOAD ── */
+.upzone{border:2px dashed var(--border2);border-radius:10px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:white;}
+.upzone:hover,.upzone.drag{border-color:var(--m);background:var(--ml);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--md);color:white;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;z-index:300;transform:translateY(50px);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;box-shadow:var(--shm);border-left:3px solid var(--g);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-left-color:var(--green);}
+.toast.err{border-left-color:var(--red);}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty h3{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--m);margin-bottom:6px;}
+
+/* ── UTIL ── */
+.flex{display:flex;} .ic{align-items:center;} .jb{justify-content:space-between;}
+.g2{gap:8px;} .g3{gap:12px;} .g4{gap:16px;}
+.mb2{margin-bottom:8px;} .mb3{margin-bottom:12px;} .mb4{margin-bottom:16px;} .mb5{margin-bottom:20px;}
+.mt3{margin-top:12px;} .mt4{margin-top:16px;}
+.muted{color:var(--muted);} .gold{color:var(--gd);} .maroon{color:var(--m);}
+.mono{font-family:'JetBrains Mono',monospace;} .serif{font-family:'Cormorant Garamond',serif;}
+.fw6{font-weight:600;} .fs11{font-size:11px;} .fs12{font-size:12px;} .fs13{font-size:13px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.w100{width:100%;}
+hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-m">M</div>
+    <div class="logo-name">Mentora</div>
+  </div>
+  <div class="logo-sep"></div>
+  <div class="nav-tabs">
+    <div class="ntab active" id="nt-students" onclick="showTab('students')">Students</div>
+    <div class="ntab" id="nt-tests"    onclick="showTab('tests')">Test Reports</div>
+    <div class="ntab" id="nt-upload"   onclick="showTab('upload')">Upload / Entry</div>
+    <div class="ntab" id="nt-setup"    onclick="showTab('setup')">Setup</div>
+  </div>
+</div>
+
+<!-- ══ PAGE: STUDENTS ══ -->
+<div class="page active" id="pg-students">
+  <div class="sel-bar">
+    <div class="sel-group">
+      <div class="sel-label">Class</div>
+      <select id="s-class" onchange="onClassChange('s')"></select>
+    </div>
+    <div class="sel-group">
+      <div class="sel-label">Batch</div>
+      <select id="s-batch" onchange="renderStudentsPage()"></select>
+    </div>
+    <div class="sel-group">
+      <div class="sel-label">Search</div>
+      <input type="text" id="s-search" placeholder="Name or roll…" oninput="renderStudentsPage()" style="width:180px">
+    </div>
+  </div>
+  <div id="students-content"></div>
+</div>
+
+<!-- ══ PAGE: TESTS ══ -->
+<div class="page" id="pg-tests">
+  <div class="sel-bar">
+    <div class="sel-group">
+      <div class="sel-label">Class</div>
+      <select id="t-class" onchange="onClassChange('t')"></select>
+    </div>
+    <div class="sel-group">
+      <div class="sel-label">Batch</div>
+      <select id="t-batch" onchange="renderTestsPage()"></select>
+    </div>
+    <div class="sel-group">
+      <div class="sel-label">View</div>
+      <select id="t-mode" onchange="renderTestsPage()">
+        <option value="single">Single Test</option>
+        <option value="range">Date Range</option>
+      </select>
+    </div>
+    <!-- single -->
+    <div class="sel-group" id="tg-single">
+      <div class="sel-label">Test</div>
+      <select id="t-test" onchange="renderTestsPage()"></select>
+    </div>
+    <!-- range -->
+    <div class="sel-group" id="tg-from" style="display:none">
+      <div class="sel-label">From</div>
+      <input type="date" id="t-from" onchange="renderTestsPage()">
+    </div>
+    <div class="sel-group" id="tg-to" style="display:none">
+      <div class="sel-label">To</div>
+      <input type="date" id="t-to" onchange="renderTestsPage()">
+    </div>
+  </div>
+  <div id="tests-content"></div>
+</div>
+
+<!-- ══ PAGE: UPLOAD ══ -->
+<div class="page" id="pg-upload">
+  <div style="max-width:680px;margin:0 auto">
+
+    <!-- CSV -->
+    <div class="card cp mb4">
+      <div class="ct">📂 Upload CSV</div>
+      <div class="grid2 mb4">
+        <div class="sel-group w100"><div class="sel-label">Class</div><select id="up-class" onchange="onClassChange('up')" style="width:100%"></select></div>
+        <div class="sel-group w100"><div class="sel-label">Batch</div><select id="up-batch" style="width:100%"></select></div>
+      </div>
+      <div class="msgbox fs12 mb3" style="min-height:48px">roll,name,test_name,date,[subject1],[subject2],...
+e.g: 9A-001,Aarav Sharma,Unit Test 1,2025-04-10,78,85,92,65,70</div>
+      <div class="flex g2 mb4">
+        <button class="btn btn-out btn-sm" onclick="dlTemplate()">⬇ Template</button>
+        <span class="muted fs12" style="align-self:center">Columns must match class subjects in order</span>
+      </div>
+      <div class="upzone" id="upzone" onclick="document.getElementById('csvfile').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)">
+        <div style="font-size:30px;margin-bottom:8px">📁</div>
+        <div class="fw6 fs13 mb2">Drop CSV here or click to browse</div>
+        <div class="muted fs12">Will add to selected class & batch</div>
+        <input type="file" id="csvfile" accept=".csv" style="display:none" onchange="handleCSV(this.files[0])">
+      </div>
+      <div id="up-result" class="mt3"></div>
+    </div>
+
+    <!-- Manual -->
+    <div class="card cp">
+      <div class="ct">✏️ Manual Entry</div>
+      <div class="grid2 mb3">
+        <div class="sel-group w100"><div class="sel-label">Class</div><select id="me-class" onchange="onClassChange('me')" style="width:100%"></select></div>
+        <div class="sel-group w100"><div class="sel-label">Batch</div><select id="me-batch" style="width:100%"></select></div>
+        <div class="sel-group w100"><div class="sel-label">Student Roll</div><input type="text" id="me-roll" placeholder="e.g. 9A-001" style="width:100%"></div>
+        <div class="sel-group w100"><div class="sel-label">Test Name</div><input type="text" id="me-test" placeholder="Unit Test 1" style="width:100%"></div>
+        <div class="sel-group w100"><div class="sel-label">Date</div><input type="date" id="me-date" style="width:100%"></div>
+      </div>
+      <div id="me-marks" class="grid2 mb3"></div>
+      <div class="flex g2">
+        <button class="btn btn-m" onclick="saveManual()">Save</button>
+        <button class="btn btn-out" onclick="clearManual()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: SETUP ══ -->
+<div class="page" id="pg-setup">
+  <div style="max-width:700px;margin:0 auto">
+    <div class="grid2 mb4">
+
+      <!-- Classes -->
+      <div class="card cp">
+        <div class="ct">📚 Classes</div>
+        <div id="cls-tags" class="flex" style="flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div class="flex g2">
+          <input type="text" id="nc-name" placeholder="Class name" style="flex:1">
+          <button class="btn btn-m btn-sm" onclick="addClass()">+ Add</button>
+        </div>
+      </div>
+
+      <!-- Batches -->
+      <div class="card cp">
+        <div class="ct">👥 Batches</div>
+        <div class="sel-group w100 mb3"><div class="sel-label">For Class</div><select id="nb-class" onchange="renderBatchTags()" style="width:100%"></select></div>
+        <div id="batch-tags" class="flex" style="flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        <div class="flex g2">
+          <input type="text" id="nb-name" placeholder="Batch name" style="flex:1">
+          <button class="btn btn-m btn-sm" onclick="addBatch()">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subjects -->
+    <div class="card cp mb4">
+      <div class="ct">📖 Subjects per Class</div>
+      <div id="sub-panel"></div>
+    </div>
+
+    <!-- Add Student -->
+    <div class="card cp">
+      <div class="ct">🎓 Add Student</div>
+      <div class="grid2 mb3">
+        <div class="sel-group w100"><div class="sel-label">Class</div><select id="ns-class" onchange="onClassChange('ns')" style="width:100%"></select></div>
+        <div class="sel-group w100"><div class="sel-label">Batch</div><select id="ns-batch" style="width:100%"></select></div>
+        <div class="sel-group w100"><div class="sel-label">Full Name</div><input type="text" id="ns-name" placeholder="Student name" style="width:100%"></div>
+        <div class="sel-group w100"><div class="sel-label">Roll No.</div><input type="text" id="ns-roll" placeholder="e.g. 9A-045" style="width:100%"></div>
+        <div class="sel-group w100"><div class="sel-label">Parent Name</div><input type="text" id="ns-parent" placeholder="Guardian name" style="width:100%"></div>
+        <div class="sel-group w100"><div class="sel-label">Phone</div><input type="text" id="ns-phone" placeholder="+91 XXXXX XXXXX" style="width:100%"></div>
+      </div>
+      <button class="btn btn-m" onclick="addStudent()">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="ov" id="ov" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mh" id="mh"></div>
+    <div class="mb" id="mb"></div>
+    <div class="mf" id="mf"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const PASS = 35;
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+const FN=['Aarav','Priya','Rohan','Sneha','Karan','Ananya','Vikram','Pooja','Arjun','Meera','Dev','Ishita','Nikhil','Kavya','Rahul','Shruti','Aditya','Riya','Siddharth','Naina','Mohit','Tanya','Harsh','Simran','Vivek','Palak','Kunal','Divya','Amit','Sakshi'];
+const LN=['Sharma','Gupta','Singh','Kumar','Patel','Mehta','Verma','Joshi','Shah','Yadav','Reddy','Nair','Iyer','Chopra','Malhotra','Sinha','Mishra','Tiwari','Dubey','Khanna'];
+
+let DB = {
+  classes:[
+    {id:'c9',  name:'Class 9',          subjects:['Maths','Science','English','Social','Hindi']},
+    {id:'c10', name:'Class 10',         subjects:['Maths','Science','English','Social','Hindi']},
+    {id:'c11', name:'Class 11 Science', subjects:['Physics','Chemistry','Maths','Biology','English']},
+    {id:'c12', name:'Class 12 Science', subjects:['Physics','Chemistry','Maths','Biology','English']},
+  ],
+  batches:[
+    {id:'9A',classId:'c9',name:'Batch A'},{id:'9B',classId:'c9',name:'Batch B'},
+    {id:'10A',classId:'c10',name:'Batch A'},{id:'10B',classId:'c10',name:'Batch B'},
+    {id:'11A',classId:'c11',name:'Batch A'},{id:'11B',classId:'c11',name:'Batch B'},
+    {id:'12A',classId:'c12',name:'Batch A'},{id:'12B',classId:'c12',name:'Batch B'},
+  ],
+  students:[],
+  tests:[]
+};
+
+// Seed students
+let _sid=1;
+DB.batches.forEach(b=>{
+  const n=rnd(28,36);
+  for(let i=0;i<n;i++){
+    const fn=FN[rnd(0,FN.length-1)],ln=LN[rnd(0,LN.length-1)];
+    DB.students.push({id:'S'+(_sid++),classId:b.classId,batchId:b.id,name:`${fn} ${ln}`,roll:`${b.id}-${String(i+1).padStart(3,'0')}`,parent:`${ln} Sr.`,phone:`+919${rnd(100,999)}${rnd(100,999)}${rnd(1000,9999)}`});
+  }
+});
+
+// Seed tests
+const MTHS=[
+  {label:'Jan 2025',tests:['Unit Test 1','Unit Test 2','Monthly Exam'],dates:['2025-01-08','2025-01-16','2025-01-25']},
+  {label:'Feb 2025',tests:['Unit Test 1','Unit Test 2','Monthly Exam'],dates:['2025-02-05','2025-02-13','2025-02-22']},
+  {label:'Mar 2025',tests:['Unit Test 1','Unit Test 2','Monthly Exam'],dates:['2025-03-06','2025-03-14','2025-03-21']},
+];
+let _tid=1;
+DB.batches.forEach(b=>{
+  const cls=DB.classes.find(c=>c.id===b.classId);
+  const studs=DB.students.filter(s=>s.batchId===b.id);
+  MTHS.forEach(m=>{
+    m.tests.forEach((tname,ti)=>{
+      const results=studs.map(s=>{
+        const marks={},base=rnd(25,78);let total=0;
+        cls.subjects.forEach(sub=>{const sc=Math.min(100,Math.max(0,base+rnd(-20,22)));marks[sub]=sc;total+=sc;});
+        return {studentId:s.id,marks,total,percentage:+(total/(cls.subjects.length*100)*100).toFixed(1)};
+      });
+      [...results].sort((a,b)=>b.total-a.total).forEach((r,i)=>results.find(x=>x.studentId===r.studentId).rank=i+1);
+      DB.tests.push({id:'T'+(_tid++),name:tname,date:m.dates[ti],month:m.label,classId:b.classId,batchId:b.id,results});
+    });
+  });
+});
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+const gc  = id => DB.classes.find(c=>c.id===id);
+const gb  = id => DB.batches.find(b=>b.id===id);
+const gbs = cid => DB.batches.filter(b=>b.classId===cid);
+const gss = bid => DB.students.filter(s=>s.batchId===bid);
+const gts = (cid,bid) => DB.tests.filter(t=>t.classId===cid&&t.batchId===bid);
+const pc  = p => p>=60?'var(--green)':p>=PASS?'var(--orange)':'var(--red)';
+function prog(p){
+  const c=pc(p);
+  return `<div class="prog"><div class="pbar"><div class="pfill" style="width:${p}%;background:${c}"></div></div><span class="plbl mono" style="color:${c};font-weight:600">${p}%</span></div>`;
+}
+function rPip(r){const cl=r===1?'r1':r===2?'r2':r===3?'r3':'rn';return `<span class="rk ${cl}">${r}</span>`;}
+
+// Populate a select with options, preserving current value if possible
+function fillSel(elId, opts /* [{val,label}] */){
+  const el=document.getElementById(elId);if(!el)return;
+  const cur=el.value;
+  el.innerHTML=opts.map(o=>`<option value="${o.val}">${o.label}</option>`).join('');
+  if(opts.find(o=>o.val===cur)) el.value=cur;
+}
+
+function classopts(){return DB.classes.map(c=>({val:c.id,label:c.name}));}
+function batchopts(cid){return gbs(cid).map(b=>({val:b.id,label:b.name}));}
+
+// onClassChange: prefix 's','t','up','me','ns','nb'
+function onClassChange(pfx){
+  const cid=document.getElementById(pfx+'-class').value;
+  fillSel(pfx+'-batch',batchopts(cid));
+  if(pfx==='s') renderStudentsPage();
+  else if(pfx==='t'){fillTestSel();renderTestsPage();}
+  else if(pfx==='me') renderMeMarks();
+}
+
+function fillTestSel(){
+  const cid=document.getElementById('t-class').value;
+  const bid=document.getElementById('t-batch').value;
+  const tests=gts(cid,bid);
+  fillSel('t-test',tests.map(t=>({val:t.id,label:`${t.name} — ${t.date}`})));
+  renderTestsPage();
+}
+
+// ══════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════
+function showTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(n=>n.classList.remove('active'));
+  document.getElementById('pg-'+tab).classList.add('active');
+  document.getElementById('nt-'+tab).classList.add('active');
+  if(tab==='students') renderStudentsPage();
+  else if(tab==='tests') renderTestsPage();
+  else if(tab==='setup') renderSetup();
+}
+
+// ══════════════════════════════════════
+//  PAGE: STUDENTS
+// ══════════════════════════════════════
+function renderStudentsPage(){
+  const cid=document.getElementById('s-class')?.value;
+  const bid=document.getElementById('s-batch')?.value;
+  const q  =(document.getElementById('s-search')?.value||'').toLowerCase();
+  if(!cid||!bid){document.getElementById('students-content').innerHTML='';return;}
+  const cls=gc(cid);
+  const tests=gts(cid,bid);
+  const allR=tests.flatMap(t=>t.results);
+  let studs=gss(bid);
+  if(q) studs=studs.filter(s=>s.name.toLowerCase().includes(q)||s.roll.toLowerCase().includes(q));
+
+  const rows=studs.map(s=>{
+    const rr=allR.filter(r=>r.studentId===s.id);
+    const avg=rr.length?+(rr.reduce((a,r)=>a+r.percentage,0)/rr.length).toFixed(1):0;
+    const last=tests.length?tests[tests.length-1].results.find(r=>r.studentId===s.id):null;
+    return{...s,avg,lastPct:last?last.percentage:'-',lastRank:last?last.rank:'-'};
+  }).sort((a,b)=>b.avg-a.avg);
+
+  const totalStuds=gss(bid).length;
+  const passCount=rows.filter(r=>r.avg>=PASS).length;
+  const clsAvg=rows.length?+(rows.reduce((a,r)=>a+r.avg,0)/rows.length).toFixed(1):0;
+
+  document.getElementById('students-content').innerHTML=`
+  <div class="stat-row">
+    <div class="stat"><div class="stat-lbl">Students</div><div class="stat-val">${totalStuds}</div><div class="stat-sub">${cls.name} · ${gb(bid)?.name}</div></div>
+    <div class="stat"><div class="stat-lbl">Batch Average</div><div class="stat-val" style="color:var(--gd)">${clsAvg}%</div><div class="stat-sub">${tests.length} tests</div></div>
+    <div class="stat"><div class="stat-lbl">Passing</div><div class="stat-val" style="color:var(--green)">${passCount}</div><div class="stat-sub">of ${rows.length} students</div></div>
+    <div class="stat"><div class="stat-lbl">At Risk</div><div class="stat-val" style="color:var(--red)">${rows.length-passCount}</div><div class="stat-sub">below ${PASS}%</div></div>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div class="tbl-title">All Students</div>
+      <div class="flex g2">
+        <button class="btn btn-out btn-sm" onclick="exportCSV('${cid}','${bid}')">⬇ Export</button>
+        <button class="btn btn-m btn-sm" onclick="notifyAll('${cid}','${bid}')">📢 Notify All At Risk</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Roll</th><th>Overall Avg</th><th>Last Test</th><th>Last Rank</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        ${rows.map((s,i)=>`
+        <tr onclick="openStudent('${s.id}')">
+          <td class="mono muted fs12">${i+1}</td>
+          <td class="fw6">${s.name}</td>
+          <td class="mono muted fs12">${s.roll}</td>
+          <td>${prog(s.avg)}</td>
+          <td class="mono fs12">${s.lastPct}${typeof s.lastPct==='number'?'%':''}</td>
+          <td>${s.lastRank!=='-'?rPip(s.lastRank):'-'}</td>
+          <td><span class="badge ${s.avg>=PASS?'b-pass':'b-fail'}">${s.avg>=PASS?'Pass':'At Risk'}</span></td>
+          <td><button class="btn btn-xs btn-out" onclick="event.stopPropagation();openStudent('${s.id}')">View ↗</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+//  PAGE: TESTS
+// ══════════════════════════════════════
+function renderTestsPage(){
+  const cid=document.getElementById('t-class')?.value;
+  const bid=document.getElementById('t-batch')?.value;
+  const mode=document.getElementById('t-mode')?.value;
+  if(!cid||!bid){document.getElementById('tests-content').innerHTML='';return;}
+
+  // Toggle UI
+  document.getElementById('tg-single').style.display=mode==='single'?'flex':'none';
+  document.getElementById('tg-from').style.display=mode==='range'?'flex':'none';
+  document.getElementById('tg-to').style.display=mode==='range'?'flex':'none';
+
+  const allTests=gts(cid,bid);
+  let tests=[];
+
+  if(mode==='single'){
+    const tid=document.getElementById('t-test')?.value;
+    const t=DB.tests.find(x=>x.id===tid);
+    if(t) tests=[t];
+  } else {
+    const from=document.getElementById('t-from')?.value;
+    const to=document.getElementById('t-to')?.value;
+    tests=allTests.filter(t=>(!from||t.date>=from)&&(!to||t.date<=to));
+  }
+
+  if(!tests.length){
+    document.getElementById('tests-content').innerHTML=`<div class="empty"><div class="empty-icon">📋</div><h3>No tests found</h3><p class="muted">Adjust the filter or upload test data</p></div>`;
+    return;
+  }
+
+  const cls=gc(cid),batch=gb(bid);
+  const studs=gss(bid);
+  const allR=tests.flatMap(t=>t.results);
+
+  // Aggregate per student
+  const aggr=studs.map(s=>{
+    const rr=allR.filter(r=>r.studentId===s.id);
+    if(!rr.length) return null;
+    const avg=+(rr.reduce((a,r)=>a+r.percentage,0)/rr.length).toFixed(1);
+    const subAvgs={};
+    cls.subjects.forEach(sub=>{
+      const sc=rr.map(r=>r.marks[sub]).filter(x=>x!=null);
+      subAvgs[sub]=sc.length?+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(0):0;
+    });
+    return{...s,avg,subAvgs,tests:rr.length};
+  }).filter(Boolean).sort((a,b)=>b.avg-a.avg);
+  aggr.forEach((r,i)=>r.aggRank=i+1);
+
+  const clsAvg=aggr.length?+(aggr.reduce((a,r)=>a+r.avg,0)/aggr.length).toFixed(1):0;
+  const passN=aggr.filter(r=>r.avg>=PASS).length;
+
+  // Subject averages
+  const subAvgs=cls.subjects.map(sub=>{
+    const sc=allR.map(r=>r.marks[sub]).filter(x=>x!=null);
+    return{sub,avg:sc.length?+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(1):0};
+  });
+
+  const label=mode==='single'?tests[0].name:`${tests.length} Tests (${tests[0].date} → ${tests[tests.length-1].date})`;
+
+  document.getElementById('tests-content').innerHTML=`
+  <div class="stat-row">
+    <div class="stat"><div class="stat-lbl">Tests</div><div class="stat-val">${tests.length}</div><div class="stat-sub">${cls.name} · ${batch.name}</div></div>
+    <div class="stat"><div class="stat-lbl">Class Avg</div><div class="stat-val" style="color:var(--gd)">${clsAvg}%</div><div class="stat-sub">Aggregated</div></div>
+    <div class="stat"><div class="stat-lbl">Passing</div><div class="stat-val" style="color:var(--green)">${passN}</div><div class="stat-sub">of ${aggr.length}</div></div>
+    <div class="stat"><div class="stat-lbl">At Risk</div><div class="stat-val" style="color:var(--red)">${aggr.length-passN}</div><div class="stat-sub">below ${PASS}%</div></div>
+  </div>
+
+  <div class="grid2 mb4">
+    <div class="card cp">
+      <div class="ct">Subject Performance</div>
+      ${subAvgs.map(x=>{
+        const c=pc(+x.avg);
+        return `<div class="mb3">
+          <div class="flex ic jb mb2"><span class="fs13">${x.sub}</span><span class="mono fs12 fw6" style="color:${c}">${x.avg}/100</span></div>
+          <div class="pbar" style="max-width:100%;height:7px"><div class="pfill" style="width:${x.avg}%;background:${c}"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="card cp">
+      <div class="ct">Tests in Range</div>
+      ${tests.map(t=>{
+        const ta=(t.results.reduce((s,r)=>s+r.percentage,0)/t.results.length).toFixed(1);
+        const tp=((t.results.filter(r=>r.percentage>=PASS).length/t.results.length)*100).toFixed(0);
+        return `<div class="flex ic jb" style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div class="fs13 fw6">${t.name}</div>
+            <div class="mono muted fs11">${t.date}</div>
+          </div>
+          <div class="flex ic g2">
+            <span class="mono fs12 fw6 maroon">${ta}%</span>
+            <span class="badge b-pass">${tp}% pass</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div class="tbl-title">Ranked Results — ${label}</div>
+      <div class="flex g2">
+        <button class="btn btn-out btn-sm" onclick="exportTestCSV('${cid}','${bid}')">⬇ Export</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Rank</th><th>Name</th><th>Roll</th>
+        ${cls.subjects.map(s=>`<th>${s}</th>`).join('')}
+        <th>Avg %</th><th>Tests</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${aggr.map(s=>`
+        <tr onclick="openStudent('${s.id}')">
+          <td>${rPip(s.aggRank)}</td>
+          <td class="fw6">${s.name}</td>
+          <td class="mono muted fs12">${s.roll}</td>
+          ${cls.subjects.map(sub=>{const m=s.subAvgs[sub];const c=pc(m);return `<td class="mono fs12 fw6" style="color:${c}">${m}</td>`;}).join('')}
+          <td>${prog(s.avg)}</td>
+          <td class="mono muted fs12">${s.tests}</td>
+          <td><span class="badge ${s.avg>=PASS?'b-pass':'b-fail'}">${s.avg>=PASS?'Pass':'At Risk'}</span></td>
+          <td><button class="btn btn-xs btn-out" onclick="event.stopPropagation();openStudent('${s.id}')">↗</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+//  STUDENT MODAL
+// ══════════════════════════════════════
+function openStudent(sid){
+  const s=DB.students.find(x=>x.id===sid);
+  if(!s) return;
+  const cls=gc(s.classId),batch=gb(s.batchId);
+  const tests=gts(s.classId,s.batchId);
+  const trs=tests.map(t=>({...t,r:t.results.find(r=>r.studentId===sid)})).filter(x=>x.r);
+  const avg=trs.length?+(trs.reduce((a,t)=>a+t.r.percentage,0)/trs.length).toFixed(1):0;
+  const initials=s.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('mh').innerHTML=`
+    <div>
+      <div class="mt">${s.name}</div>
+      <div class="ms">${s.roll} · ${cls.name} · ${batch.name}</div>
+    </div>
+    <button class="cbtn" onclick="closeModal()">✕</button>`;
+
+  renderStudentTab('overview',s,cls,batch,trs,avg,initials);
+
+  document.getElementById('mf').innerHTML=`
+    <button class="btn btn-out btn-sm" onclick="closeModal()">Close</button>
+    <button class="btn btn-g btn-sm" onclick="printReport('${sid}')">🖨 Print</button>
+    <button class="btn btn-m btn-sm" onclick="showTab('msg');sTab('msg','${sid}')">💬 Notify Parent</button>`;
+
+  document.getElementById('ov').style.display='flex';
+}
+
+function renderStudentTab(tab,s,cls,batch,trs,avg,initials){
+  document.getElementById('mb').innerHTML=`
+    <div class="s-hdr">
+      <div class="s-av">${initials}</div>
+      <div style="flex:1">
+        <div class="s-name">${s.name}</div>
+        <div class="s-meta">${s.roll} · ${cls.name} · ${batch.name}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="serif" style="font-size:26px;color:var(--m);font-weight:600">${avg}%</div>
+        <div class="fs11 muted">Overall Avg</div>
+        <span class="badge ${avg>=PASS?'b-pass':'b-fail'}" style="margin-top:4px">${avg>=PASS?'Passing':'At Risk'}</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab ${tab==='overview'?'active':''}" onclick="sTabSwitch('overview','${s.id}')">Overview</div>
+      <div class="tab ${tab==='history'?'active':''}" onclick="sTabSwitch('history','${s.id}')">All Tests</div>
+      <div class="tab ${tab==='notify'?'active':''}" onclick="sTabSwitch('notify','${s.id}')">Notify Parent</div>
+    </div>
+    <div id="stc">${tab==='overview'?stOverview(s,cls,trs):tab==='history'?stHistory(cls,trs):stNotify(s,cls,batch,trs,avg)}</div>`;
+}
+
+function sTabSwitch(tab,sid){
+  const s=DB.students.find(x=>x.id===sid);
+  const cls=gc(s.classId),batch=gb(s.batchId);
+  const tests=gts(s.classId,s.batchId);
+  const trs=tests.map(t=>({...t,r:t.results.find(r=>r.studentId===sid)})).filter(x=>x.r);
+  const avg=trs.length?+(trs.reduce((a,t)=>a+t.r.percentage,0)/trs.length).toFixed(1):0;
+  const initials=s.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+  renderStudentTab(tab,s,cls,batch,trs,avg,initials);
+}
+
+function stOverview(s,cls,trs){
+  const subAvgs=cls.subjects.map(sub=>{
+    const sc=trs.map(t=>t.r.marks[sub]).filter(x=>x!=null);
+    return{sub,avg:sc.length?+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(0):0};
+  });
+  const recent=trs.slice(-7);
+
+  return `
+  <div class="sub-row">
+    ${subAvgs.map(x=>{const c=pc(x.avg);return `<div class="sub-pill"><div class="sp-name">${x.sub}</div><div class="sp-val" style="color:${c}">${x.avg}<span class="muted" style="font-size:13px">/100</span></div></div>`;}).join('')}
+  </div>
+  <div class="card cp">
+    <div class="fs13 fw6 mb3">Trend — Last ${recent.length} Tests</div>
+    <div class="spark">
+      ${recent.map(t=>{const h=t.r.percentage*.82;const c=pc(t.r.percentage);return `<div class="sc">
+        <div class="fs11 muted mono">${t.r.percentage}%</div>
+        <div class="sb" style="height:${Math.max(4,h)}%;background:${c}"></div>
+        <div class="sl">${t.name.replace('Unit ','UT').replace('Monthly ','ME')}<br>${t.date.slice(5)}</div>
+      </div>`;}).join('')}
+    </div>
+  </div>`;
+}
+
+function stHistory(cls,trs){
+  return `<div style="overflow-x:auto"><table>
+    <thead><tr><th>Test</th><th>Date</th>${cls.subjects.map(s=>`<th>${s}</th>`).join('')}<th>%</th><th>Rank</th></tr></thead>
+    <tbody>
+      ${trs.map(t=>`<tr>
+        <td class="fw6 fs13">${t.name}</td>
+        <td class="mono muted fs12">${t.date}</td>
+        ${cls.subjects.map(sub=>{const m=t.r.marks[sub];const c=pc(m);return `<td class="mono fs12 fw6" style="color:${c}">${m}</td>`;}).join('')}
+        <td>${prog(t.r.percentage)}</td>
+        <td>${rPip(t.r.rank)}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+function stNotify(s,cls,batch,trs,avg){
+  const last=trs[trs.length-1];
+  const subAvgs=cls.subjects.map(sub=>{
+    const sc=trs.map(t=>t.r.marks[sub]).filter(x=>x!=null);
+    return{sub,avg:sc.length?+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(0):0};
+  });
+  const weak=subAvgs.filter(x=>x.avg<50).map(x=>x.sub);
+  const strong=subAvgs.filter(x=>x.avg>=70).map(x=>x.sub);
+  const pass=avg>=PASS;
+
+  const msg=`Dear ${s.parent},
+
+Greetings from Mentora Institute.
+
+Performance update for ${s.name} (${s.roll}) — ${cls.name}, ${batch.name}.
+
+OVERALL SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Overall Average : ${avg}%
+Last Test       : ${last?last.name+' ('+last.date+')':'—'}
+Score           : ${last?last.r.percentage+'%':'—'}
+Class Rank      : ${last?'#'+last.r.rank+' / '+gss(batch.id).length:'—'}
+Status          : ${pass?'✅ Performing Well':'⚠️ Needs Attention'}
+
+SUBJECT AVERAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${subAvgs.map(x=>`${x.sub.padEnd(12)}: ${x.avg}/100`).join('\n')}
+${strong.length?'\n✅ Strengths  : '+strong.join(', '):''}
+${weak.length?'\n⚠️ Focus areas: '+weak.join(', '):''}
+
+${pass?'Your ward is on track. Keep encouraging them!':'We recommend a meeting to discuss an improvement plan for your ward.'}
+
+Warm regards,
+Mentora Institute`;
+
+  return `
+  <div class="flex ic jb mb3">
+    <span class="muted fs12">Parent message for ${s.name}</span>
+    <div class="flex g2">
+      <button class="btn btn-out btn-sm" onclick="copyMsg()">📋 Copy</button>
+      <button class="btn btn-m btn-sm" onclick="openWA('${s.phone}')">💬 WhatsApp</button>
+    </div>
+  </div>
+  <div class="msgbox" id="pmsg">${msg}</div>`;
+}
+
+// ══════════════════════════════════════
+//  NOTIFY ALL AT RISK
+// ══════════════════════════════════════
+function notifyAll(cid,bid){
+  const cls=gc(cid),batch=gb(bid);
+  const tests=gts(cid,bid);
+  const studs=gss(bid);
+  const allR=tests.flatMap(t=>t.results);
+  const atRisk=studs.filter(s=>{
+    const rr=allR.filter(r=>r.studentId===s.id);
+    const avg=rr.length?+(rr.reduce((a,r)=>a+r.percentage,0)/rr.length).toFixed(1):0;
+    return avg<PASS;
+  });
+  if(!atRisk.length){toast('No at-risk students 🎉','ok');return;}
+
+  const msgs=atRisk.map(s=>{
+    const rr=allR.filter(r=>r.studentId===s.id);
+    const avg=+(rr.reduce((a,r)=>a+r.percentage,0)/rr.length).toFixed(1);
+    return `📌 ${s.name} (${s.roll}) — Avg: ${avg}% — ${s.phone}`;
+  }).join('\n');
+
+  document.getElementById('mh').innerHTML=`<div><div class="mt">At-Risk Students (${atRisk.length})</div><div class="ms">${cls.name} · ${batch.name}</div></div><button class="cbtn" onclick="closeModal()">✕</button>`;
+  document.getElementById('mb').innerHTML=`
+    <p class="muted fs13 mb3">The following students are below ${PASS}%. You can open each individually to send a personalised message.</p>
+    <div class="msgbox">${msgs}</div>
+    <div class="mt4">
+      ${atRisk.map(s=>`<div class="flex ic jb" style="padding:8px 0;border-bottom:1px solid var(--border)">
+        <div><span class="fw6 fs13">${s.name}</span> <span class="mono muted fs12">${s.roll}</span></div>
+        <button class="btn btn-xs btn-m" onclick="closeModal();setTimeout(()=>openStudent('${s.id}'),120)">View & Notify</button>
+      </div>`).join('')}
+    </div>`;
+  document.getElementById('mf').innerHTML=`<button class="btn btn-out btn-sm" onclick="closeModal()">Close</button>`;
+  document.getElementById('ov').style.display='flex';
+}
+
+// ══════════════════════════════════════
+//  SETUP PAGE
+// ══════════════════════════════════════
+function renderSetup(){
+  // Classes
+  document.getElementById('cls-tags').innerHTML=DB.classes.map(c=>`
+    <span style="display:inline-flex;align-items:center;gap:5px;background:var(--ml);color:var(--m);border:1px solid var(--mm);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500">
+      ${c.name}<span style="cursor:pointer;opacity:.6" onclick="delClass('${c.id}')">×</span>
+    </span>`).join('');
+
+  // Batch for-class selector
+  fillSel('nb-class',classopts());
+  renderBatchTags();
+
+  // Subjects
+  document.getElementById('sub-panel').innerHTML=DB.classes.map(cls=>`
+    <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div class="fs13 fw6 maroon mb2">${cls.name}</div>
+      <div id="st-${cls.id}" class="flex" style="flex-wrap:wrap;gap:6px;margin-bottom:8px">
+        ${cls.subjects.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;background:var(--gl);color:var(--gd);border:1px solid var(--gd);border-opacity:.3;padding:3px 9px;border-radius:20px;font-size:12px">
+          ${s}<span style="cursor:pointer;opacity:.6" onclick="delSub('${cls.id}','${s}')">×</span>
+        </span>`).join('')}
+      </div>
+      <div class="flex g2">
+        <input type="text" id="nsub-${cls.id}" placeholder="Add subject…" style="flex:1">
+        <button class="btn btn-g btn-sm" onclick="addSub('${cls.id}')">+ Add</button>
+      </div>
+    </div>`).join('');
+
+  // All dropdowns
+  ['nc','nb','ns','up','me','s','t'].forEach(pfx=>{
+    const el=document.getElementById(pfx+'-class');
+    if(el) fillSel(pfx+'-class',classopts());
+  });
+  fillSel('nb-class',classopts());
+  initAllBatches();
+  initTestSel();
+}
+
+function initAllBatches(){
+  ['up','me','ns','s','t'].forEach(pfx=>{
+    const cel=document.getElementById(pfx+'-class');
+    const bel=document.getElementById(pfx+'-batch');
+    if(cel&&bel) fillSel(pfx+'-batch',batchopts(cel.value));
+  });
+}
+function initTestSel(){
+  const cid=document.getElementById('t-class')?.value;
+  const bid=document.getElementById('t-batch')?.value;
+  if(cid&&bid){
+    const tests=gts(cid,bid);
+    fillSel('t-test',tests.map(t=>({val:t.id,label:`${t.name} — ${t.date}`})));
+  }
+}
+
+function renderBatchTags(){
+  const cid=document.getElementById('nb-class')?.value;
+  if(!cid) return;
+  const bts=gbs(cid);
+  document.getElementById('batch-tags').innerHTML=bts.map(b=>`
+    <span style="display:inline-flex;align-items:center;gap:5px;background:var(--ml);color:var(--m);border:1px solid var(--mm);padding:4px 10px;border-radius:20px;font-size:12px">
+      ${b.name}<span style="cursor:pointer;opacity:.6" onclick="delBatch('${b.id}')">×</span>
+    </span>`).join('');
+}
+
+function addClass(){
+  const name=document.getElementById('nc-name').value.trim();
+  if(!name){toast('Enter class name','err');return;}
+  if(DB.classes.find(c=>c.name.toLowerCase()===name.toLowerCase())){toast('Already exists','err');return;}
+  const id='c'+Date.now();
+  DB.classes.push({id,name,subjects:['English']});
+  DB.batches.push({id:id+'A',classId:id,name:'Batch A'},{id:id+'B',classId:id,name:'Batch B'});
+  document.getElementById('nc-name').value='';
+  toast('✓ Class added','ok');
+  renderSetup();
+}
+function delClass(id){
+  if(!confirm('Delete class and all data?')) return;
+  DB.classes=DB.classes.filter(c=>c.id!==id);
+  DB.batches=DB.batches.filter(b=>b.classId!==id);
+  DB.students=DB.students.filter(s=>s.classId!==id);
+  DB.tests=DB.tests.filter(t=>t.classId!==id);
+  toast('Class deleted');renderSetup();
+}
+function addBatch(){
+  const cid=document.getElementById('nb-class').value;
+  const name=document.getElementById('nb-name').value.trim();
+  if(!name){toast('Enter batch name','err');return;}
+  if(gbs(cid).find(b=>b.name.toLowerCase()===name.toLowerCase())){toast('Already exists','err');return;}
+  DB.batches.push({id:cid+'_'+Date.now(),classId:cid,name});
+  document.getElementById('nb-name').value='';
+  toast('✓ Batch added','ok');renderSetup();
+}
+function delBatch(bid){
+  if(!confirm('Delete batch and its data?')) return;
+  DB.batches=DB.batches.filter(b=>b.id!==bid);
+  DB.students=DB.students.filter(s=>s.batchId!==bid);
+  DB.tests=DB.tests.filter(t=>t.batchId!==bid);
+  toast('Batch deleted');renderSetup();
+}
+function addSub(cid){
+  const el=document.getElementById('nsub-'+cid);
+  const val=el.value.trim();
+  if(!val){toast('Enter subject','err');return;}
+  const cls=gc(cid);
+  if(cls.subjects.includes(val)){toast('Already exists','err');return;}
+  cls.subjects.push(val);el.value='';
+  document.getElementById('st-'+cid).innerHTML=cls.subjects.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;background:var(--gl);color:var(--gd);border:1px solid var(--gd);padding:3px 9px;border-radius:20px;font-size:12px">${s}<span style="cursor:pointer;opacity:.6" onclick="delSub('${cid}','${s}')">×</span></span>`).join('');
+  toast('✓ Subject added','ok');
+}
+function delSub(cid,sub){
+  const cls=gc(cid);if(!cls)return;
+  cls.subjects=cls.subjects.filter(s=>s!==sub);
+  document.getElementById('st-'+cid).innerHTML=cls.subjects.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;background:var(--gl);color:var(--gd);border:1px solid var(--gd);padding:3px 9px;border-radius:20px;font-size:12px">${s}<span style="cursor:pointer;opacity:.6" onclick="delSub('${cid}','${s}')">×</span></span>`).join('');
+}
+function addStudent(){
+  const cid=document.getElementById('ns-class').value;
+  const bid=document.getElementById('ns-batch').value;
+  const name=document.getElementById('ns-name').value.trim();
+  const roll=document.getElementById('ns-roll').value.trim();
+  const parent=document.getElementById('ns-parent').value.trim();
+  const phone=document.getElementById('ns-phone').value.trim();
+  if(!name||!roll){toast('Name & Roll required','err');return;}
+  if(DB.students.find(s=>s.roll===roll)){toast('Roll already exists','err');return;}
+  DB.students.push({id:'S'+Date.now(),classId:cid,batchId:bid,name,roll,parent:parent||name+' (Parent)',phone:phone||'-'});
+  ['ns-name','ns-roll','ns-parent','ns-phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast(`✓ ${name} added`,'ok');
+}
+
+// ══════════════════════════════════════
+//  UPLOAD
+// ══════════════════════════════════════
+function handleDrop(e){e.preventDefault();document.getElementById('upzone').classList.remove('drag');if(e.dataTransfer.files[0])handleCSV(e.dataTransfer.files[0]);}
+function handleCSV(file){
+  if(!file||!file.name.endsWith('.csv')){toast('Upload a .csv file','err');return;}
+  const cid=document.getElementById('up-class').value;
+  const bid=document.getElementById('up-batch').value;
+  const cls=gc(cid);if(!cls){toast('Select class','err');return;}
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete(res){
+    const map={};
+    res.data.forEach(row=>{
+      const key=row.test_name+'||'+row.date;
+      if(!map[key]) map[key]={name:row.test_name,date:row.date,month:new Date(row.date).toLocaleString('en',{month:'short'})+' '+new Date(row.date).getFullYear(),rows:[]};
+      map[key].rows.push(row);
+    });
+    let added=0;
+    Object.values(map).forEach(tm=>{
+      if(DB.tests.find(t=>t.name===tm.name&&t.date===tm.date&&t.batchId===bid)) return;
+      const studs=gss(bid);
+      const results=[];
+      tm.rows.forEach(row=>{
+        const s=studs.find(x=>x.roll===row.roll);if(!s) return;
+        const marks={};let total=0;
+        cls.subjects.forEach(sub=>{const m=Math.min(100,Math.max(0,+(row[sub]||row[sub.toLowerCase()])||0));marks[sub]=m;total+=m;});
+        results.push({studentId:s.id,marks,total,percentage:+(total/(cls.subjects.length*100)*100).toFixed(1),rank:0});
+      });
+      if(!results.length) return;
+      [...results].sort((a,b)=>b.total-a.total).forEach((r,i)=>results.find(x=>x.studentId===r.studentId).rank=i+1);
+      DB.tests.push({id:'T'+Date.now()+'_'+added,name:tm.name,date:tm.date,month:tm.month,classId:cid,batchId:bid,results});
+      added++;
+    });
+    document.getElementById('up-result').innerHTML=`<div class="card cp" style="border-left:3px solid var(--green)"><div style="color:var(--green);font-weight:700;margin-bottom:4px">✓ Imported</div><div class="muted fs13">${res.data.length} rows · ${added} new test(s) added</div></div>`;
+    toast(`✓ ${added} test(s) imported`,'ok');
+    initTestSel();
+  },error(){toast('CSV parse error','err');}});
+}
+function dlTemplate(){
+  const cid=document.getElementById('up-class')?.value;
+  const bid=document.getElementById('up-batch')?.value;
+  const cls=gc(cid);const studs=gss(bid);
+  if(!cls||!studs.length){toast('Select class & batch','err');return;}
+  const h=`roll,name,test_name,date,${cls.subjects.join(',')}`;
+  const rows=studs.slice(0,3).map(s=>`${s.roll},${s.name},Unit Test 1,2025-04-10,${cls.subjects.map(()=>rnd(35,90)).join(',')}`);
+  const blob=new Blob([[h,...rows].join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${cls.name}_template.csv`;a.click();
+  toast('Template downloaded','ok');
+}
+function renderMeMarks(){
+  const cid=document.getElementById('me-class')?.value;
+  const cls=gc(cid);
+  const el=document.getElementById('me-marks');
+  if(!el||!cls) return;
+  el.innerHTML=cls.subjects.map(s=>`<div class="sel-group w100"><div class="sel-label">${s}</div><input type="number" id="mm-${s.replace(/\s/g,'_')}" placeholder="0–100" min="0" max="100" style="width:100%"></div>`).join('');
+}
+function saveManual(){
+  const cid=document.getElementById('me-class').value;
+  const bid=document.getElementById('me-batch').value;
+  const roll=document.getElementById('me-roll').value.trim();
+  const tname=document.getElementById('me-test').value.trim();
+  const date=document.getElementById('me-date').value;
+  if(!roll||!tname||!date){toast('Fill roll, test & date','err');return;}
+  const cls=gc(cid);
+  const s=gss(bid).find(x=>x.roll.toLowerCase()===roll.toLowerCase());
+  if(!s){toast('Student not found','err');return;}
+  let test=DB.tests.find(t=>t.name===tname&&t.date===date&&t.batchId===bid);
+  if(!test){
+    const mo=new Date(date).toLocaleString('en',{month:'short'})+' '+new Date(date).getFullYear();
+    test={id:'T'+Date.now(),name:tname,date,month:mo,classId:cid,batchId:bid,results:[]};
+    DB.tests.push(test);
+  }
+  const marks={};let total=0;
+  cls.subjects.forEach(sub=>{const el=document.getElementById('mm-'+sub.replace(/\s/g,'_'));const m=el?Math.min(100,Math.max(0,+el.value||0)):0;marks[sub]=m;total+=m;});
+  const entry={studentId:s.id,marks,total,percentage:+(total/(cls.subjects.length*100)*100).toFixed(1),rank:0};
+  const idx=test.results.findIndex(r=>r.studentId===s.id);
+  if(idx>=0) test.results[idx]=entry; else test.results.push(entry);
+  [...test.results].sort((a,b)=>b.total-a.total).forEach((r,i)=>test.results.find(x=>x.studentId===r.studentId).rank=i+1);
+  toast(`✓ Saved for ${s.name}`,'ok');
+  initTestSel();
+}
+function clearManual(){
+  ['me-roll','me-test','me-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const cls=gc(document.getElementById('me-class')?.value);
+  if(cls) cls.subjects.forEach(sub=>{const el=document.getElementById('mm-'+sub.replace(/\s/g,'_'));if(el)el.value='';});
+}
+
+// ══════════════════════════════════════
+//  EXPORT / PRINT
+// ══════════════════════════════════════
+function exportCSV(cid,bid){
+  const cls=gc(cid),studs=gss(bid),tests=gts(cid,bid),allR=tests.flatMap(t=>t.results);
+  const rows=studs.map(s=>{const rr=allR.filter(r=>r.studentId===s.id);const avg=rr.length?+(rr.reduce((a,r)=>a+r.percentage,0)/rr.length).toFixed(1):0;return `${s.roll},${s.name},${avg},${avg>=PASS?'Pass':'At Risk'}`;});
+  dl(['Roll,Name,Average%,Status',...rows].join('\n'),`${cls.name}_students.csv`);
+  toast('Exported','ok');
+}
+function exportTestCSV(cid,bid){
+  const cls=gc(cid),studs=gss(bid),tests=gts(cid,bid),allR=tests.flatMap(t=>t.results);
+  const subH=cls.subjects.join(',');
+  const rows=studs.map(s=>{
+    const rr=allR.filter(r=>r.studentId===s.id);
+    if(!rr.length) return null;
+    const avg=+(rr.reduce((a,r)=>a+r.percentage,0)/rr.length).toFixed(1);
+    const subs=cls.subjects.map(sub=>{const sc=rr.map(r=>r.marks[sub]).filter(x=>x!=null);return sc.length?+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(0):0;});
+    return `${s.roll},${s.name},${subs.join(',')},${avg},${avg>=PASS?'Pass':'At Risk'}`;
+  }).filter(Boolean);
+  dl([`Roll,Name,${subH},Avg%,Status`,...rows].join('\n'),`${cls.name}_test_report.csv`);
+  toast('Exported','ok');
+}
+function dl(csv,name){const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
+
+function printReport(sid){
+  const s=DB.students.find(x=>x.id===sid);
+  const cls=gc(s.classId),batch=gb(s.batchId);
+  const tests=gts(s.classId,s.batchId);
+  const trs=tests.map(t=>({...t,r:t.results.find(r=>r.studentId===sid)})).filter(x=>x.r);
+  const avg=trs.length?+(trs.reduce((a,t)=>a+t.r.percentage,0)/trs.length).toFixed(1):0;
+  const subAvgs=cls.subjects.map(sub=>{const sc=trs.map(t=>t.r.marks[sub]).filter(x=>x!=null);return{sub,avg:sc.length?+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(0):0};});
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>${s.name} — Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>body{font-family:'Outfit',sans-serif;padding:36px;max-width:700px;margin:auto;color:#2c1810;font-size:13px}
+  .hd{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #7B1C2E;padding-bottom:12px;margin-bottom:20px}
+  .brand{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:#7B1C2E}
+  .tag{font-size:11px;color:#C9A84C;font-style:italic}
+  .pill{background:#7B1C2E;color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700}
+  h2{font-family:'Cormorant Garamond',serif;font-size:17px;color:#7B1C2E;margin:18px 0 10px}
+  table{width:100%;border-collapse:collapse;margin-bottom:14px}
+  th,td{padding:8px 12px;border:1px solid #e4dbd2;font-size:12px}
+  th{background:#FAF7F2;font-weight:700;text-align:left}
+  .pass{color:#1a6b45;font-weight:700}.fail{color:#a01c1c;font-weight:700}
+  .ft{margin-top:32px;border-top:1px solid #e4dbd2;padding-top:12px;font-size:10px;color:#8a7060;text-align:center}</style>
+  </head><body>
+  <div class="hd"><div><div class="brand">Mentora</div><div class="tag">Where dreams meet true mentors</div></div><div class="pill">STUDENT REPORT</div></div>
+  <table>
+    <tr><th>Name</th><td>${s.name}</td><th>Roll</th><td>${s.roll}</td></tr>
+    <tr><th>Class</th><td>${cls.name}</td><th>Batch</th><td>${batch.name}</td></tr>
+    <tr><th>Overall Avg</th><td><b>${avg}%</b></td><th>Status</th><td class="${avg>=PASS?'pass':'fail'}">${avg>=PASS?'✅ Passing':'⚠️ At Risk'}</td></tr>
+    <tr><th>Parent</th><td>${s.parent}</td><th>Contact</th><td>${s.phone}</td></tr>
+  </table>
+  <h2>Subject Averages</h2>
+  <table><tr>${subAvgs.map(x=>`<th>${x.sub}</th>`).join('')}</tr><tr>${subAvgs.map(x=>`<td><b>${x.avg}/100</b></td>`).join('')}</tr></table>
+  <h2>Test History</h2>
+  <table><tr><th>Test</th><th>Date</th>${cls.subjects.map(s=>`<th>${s}</th>`).join('')}<th>%</th><th>Rank</th></tr>
+  ${trs.map(t=>`<tr><td>${t.name}</td><td>${t.date}</td>${cls.subjects.map(sub=>`<td>${t.r.marks[sub]}</td>`).join('')}<td><b>${t.r.percentage}%</b></td><td>#${t.r.rank}</td></tr>`).join('')}
+  </table>
+  <div class="ft">Mentora Academic Portal · Generated ${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+  </body></html>`);
+  win.document.close();win.print();
+}
+
+// ══════════════════════════════════════
+//  MISC
+// ══════════════════════════════════════
+function closeModal(){document.getElementById('ov').style.display='none';}
+function copyMsg(){const el=document.getElementById('pmsg');if(el)navigator.clipboard.writeText(el.innerText).then(()=>toast('✓ Copied','ok'));}
+function openWA(phone){const el=document.getElementById('pmsg');if(!el)return;window.open(`https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(el.innerText)}`);}
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(type?' '+type:'');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+function init(){
+  // Fill all class selects
+  ['s','t','up','me','ns','nb'].forEach(pfx=>{fillSel(pfx+'-class',classopts());});
+  initAllBatches();
+  initTestSel();
+  renderMeMarks();
+  renderSetup();
+  renderStudentsPage();
+}
+init();
+</script>
+</body>
+</html>
